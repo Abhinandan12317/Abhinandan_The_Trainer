@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Syne", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --color-paper: #F4F1E8;
+  --color-paper-light: #FAF8F2;
+  --color-paper-dim: #ECE8DC;
+  --color-paper-border: rgba(10, 11, 13, 0.15);
+  --color-ink: #0A0B0D;
+  --color-ink-muted: #686B72;
+  --color-ink-faint: #9EA1A8;
+  --color-cobalt: #2457FF;
+  --color-cobalt-glow: #103EC9;
+  --color-dark-bg: #090A0C;
+  --color-dark-surface: #12141A;
+  --color-dark-card: #181A22;
+  --color-dark-border: #232733;
+}
+
+/* Custom micro-styles */
+html {
+  scroll-behavior: smooth;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #F4F1E8;
+  color: #0A0B0D;
+  max-width: 100%;
+  overflow-x: hidden;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: #2457FF;
+  color: #FFFFFF;
+}
+
+/* Monograph grid background effect for subtle editorial feel */
+.bg-grid-paper {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(10, 11, 13, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(10, 11, 13, 0.035) 1px, transparent 1px);
+}
+
+.bg-grid-dark {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+}
+
+/* Hide default scrollbar for sleek presentation */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F4F1E8;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0A0B0D;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+code,
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}
