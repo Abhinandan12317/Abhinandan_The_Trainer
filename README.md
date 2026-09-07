@@ -100,17 +100,39 @@ Technology_Communicator/
 │   │   ├── TechPeopleDivider.tsx   # Interactive cognitive balance divider
 │   │   ├── AboutSection.tsx        # Background, education, & resume trigger
 │   │   ├── AskPortfolio.tsx        # Terminal Q&A assistant
-│   │   ├── ContactSection.tsx      # Inquiry dispatch protocol (email transmission)
+│   │   ├── ContactSection.tsx      # Inquiry dispatch protocol with auto-reply & JSON ledger
 │   │   ├── ResumeModal.tsx         # Full-screen CV viewer & PDF exporter
 │   │   └── CommandPalette.tsx      # Global ⌘K command palette
+│   ├── utils/
+│   │   ├── emailService.ts         # Dual EmailJS & FormSubmit transmission engine
+│   │   └── transmissionStorage.ts  # Client-side JSON audit storage & export utility
 │   ├── data/
 │   │   └── portfolioData.ts        # Single source of truth for events, projects, & photos
 │   ├── types.ts                    # TypeScript interfaces & domain types
+│   ├── vite-env.d.ts               # Vite environment type declarations
 │   ├── App.tsx                     # Main layout & section orchestration
 │   └── main.tsx                    # React application entry point
 ├── index.html                      # HTML shell & metadata
 └── package.json                    # Project dependencies & scripts
 ```
+
+---
+
+## ⚡ EmailJS Auto-Reply Setup (Optional)
+
+The inquiry dispatch protocol supports zero-config transmission out of the box via FormSubmit. To enable **instant client-side auto-reply emails** directly to the submitter's inbox using your Gmail account:
+
+1. Create a free account at [EmailJS](https://www.emailjs.com/).
+2. Add an **Email Service** connected to your Gmail (`abhinandan4dev@gmail.com`).
+3. Create an **Email Template** (with variables `{{from_name}}`, `{{from_email}}`, `{{intent}}`, `{{message}}`, `{{transmission_id}}`).
+4. Add the keys to your `.env` file (or deployment environment):
+   ```env
+   VITE_EMAILJS_SERVICE_ID="service_xxxxxxx"
+   VITE_EMAILJS_TEMPLATE_ID="template_xxxxxxx"
+   VITE_EMAILJS_PUBLIC_KEY="xxxxxxxxxxxxxxxxx"
+   # Optional dedicated auto-reply template
+   VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID="template_autoreply_xxxx"
+   ```
 
 ---
 
