@@ -65,3 +65,10 @@ export const downloadTransmissionsAsJson = (): void => {
     console.error('Failed to download transmissions JSON:', err);
   }
 };
+
+// Expose on window for easy developer & admin access anytime via console
+if (typeof window !== 'undefined') {
+  (window as any).getInquiriesJSON = getStoredTransmissions;
+  (window as any).downloadInquiriesJSON = downloadTransmissionsAsJson;
+  (window as any).clearInquiriesJSON = clearStoredTransmissions;
+}

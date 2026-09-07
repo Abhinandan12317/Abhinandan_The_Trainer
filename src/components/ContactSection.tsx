@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PERSONAL_INFO } from '../data/portfolioData';
-import { Mail, ArrowRight, CheckCircle2, Send, MapPin, Globe, AlertCircle, ExternalLink, Database, Download, Copy, Check, Trash2, ChevronDown, ChevronUp, FileJson } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Send, MapPin, Globe, AlertCircle, ExternalLink } from 'lucide-react';
 import { 
   InquiryTransmissionRecord, 
-  saveTransmission, 
-  getStoredTransmissions, 
-  clearStoredTransmissions, 
-  downloadTransmissionsAsJson 
+  saveTransmission 
 } from '../utils/transmissionStorage';
-import { sendInquiry, isEmailJsConfigured } from '../utils/emailService';
+import { sendInquiry } from '../utils/emailService';
 
 export const ContactSection: React.FC = () => {
   const [name, setName] = useState('');
@@ -19,21 +16,8 @@ export const ContactSection: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [lastAckRecord, setLastAckRecord] = useState<InquiryTransmissionRecord | null>(null);
   const [autoReplySent, setAutoReplySent] = useState(false);
-  
-  // JSON Storage Ledger State
-  const [storedRecords, setStoredRecords] = useState<InquiryTransmissionRecord[]>([]);
-  const [showLedger, setShowLedger] = useState(false);
-  const [copiedJson, setCopiedJson] = useState(false);
 
   const targetEmail = PERSONAL_INFO.email || 'abhinandan4dev@gmail.com';
-
-  useEffect(() => {
-    setStoredRecords(getStoredTransmissions());
-  }, []);
-
-  const refreshLedger = () => {
-    setStoredRecords(getStoredTransmissions());
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,9 +67,8 @@ export const ContactSection: React.FC = () => {
 
       if (result.success) {
         setAutoReplySent(result.autoReplySent);
-        // Save to JS Local Storage
+        // Silently save request and acknowledgment locally in JSON format
         saveTransmission(newRecord);
-        refreshLedger();
         setLastAckRecord(newRecord);
         setStatus('success');
         setName('');
@@ -96,7 +79,6 @@ export const ContactSection: React.FC = () => {
         // Save record with fallback status
         newRecord.status = 'FALLBACK_MAILTO';
         saveTransmission(newRecord);
-        refreshLedger();
         setLastAckRecord(newRecord);
         setStatus('fallback');
       }
@@ -104,23 +86,8 @@ export const ContactSection: React.FC = () => {
       console.warn('Transmission error, activating mailto fallback:', err);
       newRecord.status = 'FALLBACK_MAILTO';
       saveTransmission(newRecord);
-      refreshLedger();
       setLastAckRecord(newRecord);
       setStatus('fallback');
-    }
-  };
-
-  const handleCopyJson = () => {
-    const jsonStr = JSON.stringify(storedRecords, null, 2);
-    navigator.clipboard.writeText(jsonStr);
-    setCopiedJson(true);
-    setTimeout(() => setCopiedJson(false), 2000);
-  };
-
-  const handleClearLedger = () => {
-    if (window.confirm('Clear all locally stored transmission records?')) {
-      clearStoredTransmissions();
-      refreshLedger();
     }
   };
 
@@ -176,31 +143,6 @@ export const ContactSection: React.FC = () => {
                 <Globe className="w-4 h-4 text-[#2457FF]" />
                 <span>COORDINATES: {PERSONAL_INFO.coordinates}</span>
               </div>
-            </div>
-
-            {/* Local Storage Indicator Banner */}
-            <div className="mt-8 p-4 bg-[#ECE8DC] border border-[#0A0B0D]/20 flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 font-mono text-xs font-bold text-[#0A0B0D]">
-                  <Database className="w-4 h-4 text-[#2457FF]" />
-                  <span>CLIENT STORAGE ENGINE: ACTIVE</span>
-                </div>
-                <span className="font-mono text-[11px] px-2 py-0.5 bg-[#0A0B0D] text-[#F4F1E8] font-bold">
-                  {storedRecords.length} LOGGED
-                </span>
-              </div>
-              <p className="font-sans text-xs text-[#686B72]">
-                Every dispatch packet and acknowledgment signature is securely recorded locally in JSON format (<code className="font-mono bg-white px-1 py-0.5 border border-[#0A0B0D]/10">localStorage</code>).
-              </p>
-              <button
-                type="button"
-                onClick={() => setShowLedger(!showLedger)}
-                className="mt-1 flex items-center gap-1.5 font-mono text-xs font-bold text-[#2457FF] hover:underline self-start cursor-pointer"
-              >
-                <FileJson className="w-3.5 h-3.5" />
-                <span>{showLedger ? 'HIDE JSON TRANSMISSION LEDGER' : 'VIEW / EXPORT JSON TRANSMISSION LEDGER'}</span>
-                {showLedger ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-              </button>
             </div>
           </div>
 
@@ -316,9 +258,6 @@ export const ContactSection: React.FC = () => {
                       <>✓ Your inquiry was successfully delivered to <strong>{targetEmail}</strong>. Abhinandan will review your note and reply directly to <strong>{lastAckRecord?.sender.email}</strong>.</>
                     )}
                   </p>
-                  <p className="text-[10px] text-[#4A4D53] font-mono">
-                    ✓ Audit record saved to local client JSON storage (ID: {lastAckRecord?.id}).
-                  </p>
                 </div>
               )}
 
@@ -350,72 +289,7 @@ export const ContactSection: React.FC = () => {
             </form>
           </div>
         </div>
-
-        {/* Expandable JSON Transmission Ledger Drawer */}
-        {showLedger && (
-          <div className="mt-12 bg-[#0A0B0D] text-[#F4F1E8] border border-[#0A0B0D] shadow-[8px_8px_0px_#2457FF] p-6 sm:p-8 animate-in fade-in slide-in-from-top-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/15 gap-4 mb-6">
-              <div>
-                <span className="font-mono text-xs text-[#2457FF] uppercase font-bold tracking-widest block mb-1">
-                  [ AUDIT LEDGER // CLIENT-SIDE JSON REPOSITORY ]
-                </span>
-                <h3 className="font-display text-xl sm:text-2xl font-bold uppercase tracking-tight">
-                  LOCAL TRANSMISSION &amp; ACKNOWLEDGMENT STORAGE
-                </h3>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
-                <button
-                  type="button"
-                  onClick={downloadTransmissionsAsJson}
-                  disabled={storedRecords.length === 0}
-                  className="px-3 py-2 bg-[#2457FF] text-white font-bold uppercase flex items-center gap-1.5 hover:bg-blue-600 transition-colors disabled:opacity-40 cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>DOWNLOAD JSON</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleCopyJson}
-                  disabled={storedRecords.length === 0}
-                  className="px-3 py-2 bg-white/10 text-white font-bold uppercase flex items-center gap-1.5 hover:bg-white/20 transition-colors disabled:opacity-40 cursor-pointer"
-                >
-                  {copiedJson ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedJson ? 'COPIED!' : 'COPY JSON'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleClearLedger}
-                  disabled={storedRecords.length === 0}
-                  className="px-3 py-2 bg-red-500/20 text-red-300 hover:bg-red-500/40 font-bold uppercase flex items-center gap-1.5 transition-colors disabled:opacity-40 cursor-pointer"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>CLEAR</span>
-                </button>
-              </div>
-            </div>
-
-            {storedRecords.length === 0 ? (
-              <div className="p-8 text-center font-mono text-xs text-[#686B72] border border-dashed border-white/15">
-                NO TRANSMISSIONS LOGGED YET. DISPATCH A MESSAGE ABOVE TO INITIALIZE LOCAL STORAGE LEDGER.
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="max-h-[350px] overflow-y-auto bg-black/60 p-4 border border-white/10 font-mono text-xs text-green-400 leading-relaxed scrollbar-thin">
-                  <pre>{JSON.stringify(storedRecords, null, 2)}</pre>
-                </div>
-                <div className="flex items-center justify-between text-[11px] font-mono text-[#686B72]">
-                  <span>STORAGE ENGINE: browser localStorage (KEY: ABHINANDAN_TRANSMISSION_LEDGER_V1)</span>
-                  <span>TOTAL DISPATCH ENTRIES: {storedRecords.length}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </section>
   );
 };
-
